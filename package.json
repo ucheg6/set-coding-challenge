@@ -1,0 +1,21 @@
+{
+  "name": "set-code-challenge",
+  "version": "0.1.0",
+  "description": "SET coding challenge",
+  "scripts": {
+    "run": "npx tsx ./src/todo-app.ts",
+    "test": "playwright test --project=chromium"
+  },
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.46.0"
+  },
+  "dependencies": {
+    "eslint": "9.8.0",
+    "playwright": "1.46.0"
+  }
+}
