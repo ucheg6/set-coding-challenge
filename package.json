@@ -4,7 +4,7 @@
   "description": "SET coding challenge",
   "scripts": {
     "run": "npx tsx ./src/todo-app.ts",
-    "test": "playwright test --ui --project=chromium"
+    "test": "playwright test --project=chromium"
   },
   "private": true,
   "license": "UNLICENSED",

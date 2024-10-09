@@ -38,64 +38,61 @@ test.describe('Create New Todo', () => {
     await checkNumberOfTodosInLocalStorage(page, 2);
   });
   
-  test('should add a new todo item and appear last', async ({ page }) => {
-    const todoInput = page.locator('.new-todo');
-    await todoInput.fill('New Todo Item');
-    await todoInput.press('Enter');
-    await todoInput.fill('Another Todo Item');
-    await todoInput.press('Enter');
-    const todoList = page.locator('.todo-list li');
-    await expect(todoList.last()).toHaveText('Another Todo Item');
-  });
-  test('should edit a todo item', async ({ page }) => {
-    const todoInput = page.locator('.new-todo');
-    await todoInput.fill('Editable Todo Item');
-    await todoInput.press('Enter');
-    const todoList = page.locator('.todo-list li');
-    await todoList.first().dblclick();
-    const editInput = todoList.locator('.edit');
-    await editInput.fill('Updated Todo Item');
-    await editInput.press('Enter');
-    await expect(todoList.first()).toHaveText('Updated Todo Item');
-  });
-  test('should delete a todo item', async ({ page }) => {
-    const todoInput = page.locator('.new-todo');
-    await todoInput.fill('Delete Todo Item');
-    await todoInput.press('Enter');
-    const todoList = page.locator('.todo-list li');
-    await todoList.first().hover();
-    const deleteButton = todoList.locator('.destroy');
-    await deleteButton.click();
-    await expect(todoList).toHaveCount(0);
-  });
-  test('should mark a todo as completed', async ({ page }) => {
-    const todoInput = page.locator('.new-todo');
-    await todoInput.fill('Complete Todo Item');
-    await todoInput.press('Enter');
-    const todoList = page.locator('.todo-list li');
-    const completeToggle = todoList.locator('.toggle');
-    await completeToggle.click();
-    await expect(todoList).toHaveClass(/completed/);
-    await expect(todoList).toHaveText('Complete Todo Item');
-  });
-  test('should show only active items in Active list', async ({ page }) => {
-    const todoInput = page.locator('.new-todo');
-    await todoInput.fill('Active Todo Item');
-    await todoInput.press('Enter');
-    const todoList = page.locator('.todo-list li');
-    await todoList.first().locator('.toggle').click();
-    await page.click('a:has-text("Active")');
-    await expect(todoList).not.toBeVisible();
-  });
-  test('should clear completed todo items', async ({ page }) => {
-    const todoInput = page.locator('.new-todo');
-    await todoInput.fill('Completed Todo Item');
-    await todoInput.press('Enter');
-    const todoList = page.locator('.todo-list li');
-    const completeToggle = todoList.locator('.toggle');
-    await completeToggle.click();
-    await page.click('text=Clear completed');
-    await expect(todoList).toHaveCount(0);
+
+});
+
+test.describe('TodoMVC Tests', () => {
+  let todoPage: TodoPage;
+
+  test.beforeEach(async ({ page }) => {
+    todoPage = new TodoPage(page);
+    await todoPage.navigate();
   });
 
+  test('should add a new todo item', async () => {
+    const newTodo = 'Test Todo'
+    await todoPage.addTodoItem(newTodo);
+    const todoItem = await todoPage.getLastTodoItem();
+    await expect(todoItem).toHaveText(newTodo);
+  });
+
+  test('should edit a todo item', async () => {
+    const oldTodo = 'Old Todo';
+    const newTodo = 'Updated Todo';
+    await todoPage.addTodoItem(oldTodo);
+    await todoPage.editTodoItem(oldTodo, newTodo);
+    const editedTodoItem = await todoPage.getEditedItem(newTodo);
+    expect(editedTodoItem).toEqual(newTodo);
+  });
+
+  test('should delete a todo item', async () => {
+    await todoPage.addTodoItem('Todo to delete');
+    await todoPage.deleteTodoItem();
+    const count = await todoPage.getTodoCount();
+    expect(count).toBe(0);
+  });
+
+  test('should mark a todo item as completed', async () => {
+    await todoPage.addTodoItem('Todo to complete');
+    await todoPage.markFirstTodoAsComplete();
+    const completedtem = await todoPage.getCompleteItem();
+    await expect(completedtem).toHaveClass(/completed/);
+  });
+
+  test('should show only active todos', async () => {
+    await todoPage.addTodoItem('Active Todo 1');
+    await todoPage.addTodoItem('Completed Todo');
+    await todoPage.markFirstTodoAsComplete();
+    const activeCount = await todoPage.getActiveTodos();
+    expect(activeCount).toBe(1); // Only 1 active todo should be shown
+  });
+
+  test('should clear completed todos', async () => {
+    await todoPage.addTodoItem('Todo 1');
+    await todoPage.addTodoItem('Todo 2');
+    await todoPage.markFirstTodoAsComplete();
+    await todoPage.clearCompleted();
+    const count = await todoPage.getTodoCount();
+    expect(count).toBe(1); // Only Todo 2 should remain
+  });
 });
