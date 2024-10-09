@@ -36,4 +36,15 @@ test.describe('Create New Todo', () => {
 
     await checkNumberOfTodosInLocalStorage(page, 2);
   });
+  
+  test('should add a new todo item and appear last', async ({ page }) => {
+    const todoInput = page.locator('.new-todo');
+    await todoInput.fill('New Todo Item');
+    await todoInput.press('Enter');
+    await todoInput.fill('Another Todo Item');
+    await todoInput.press('Enter');
+    const todoList = page.locator('.todo-list li');
+    await expect(todoList.last()).toHaveText('Another Todo Item');
+  });
+
 });
